@@ -11,8 +11,25 @@ bool Space::init () {
     if (!Scene::init ())
         return false;
 
-    auto visibleSize = Director::getInstance ()->getVisibleSize ();
-    Vec2 origin = Director::getInstance ()->getVisibleOrigin ();
+    visibleSize = Director::getInstance ()->getVisibleSize ();
+    origin = Director::getInstance ()->getVisibleOrigin ();
+
+    //AddButtons ();
+
+    timeCounterForScale = halfPi;
+
+    TouchEventsProcessing ();
+
+    KeyboardProcessing ();
+
+    buildMatrix (3);
+    createLayers (1);
+
+    scheduleUpdate ();
+    return true;
+}
+
+void Space::AddButtons () {
 
     const float buttonStepY = 80.f;
 
@@ -46,8 +63,9 @@ bool Space::init () {
         createLayers (7);
     }});
     addChild (buttonReset, 2);
+}
 
-    timeCounterForScale = halfPi;
+void Space::TouchEventsProcessing () {
 
     auto touchEventListener = EventListenerTouchOneByOne::create ();
     touchEventListener->onTouchBegan = [=] (Touch *touch, Event *event) {
@@ -96,7 +114,14 @@ bool Space::init () {
 
         // if we didn't touch any existing neuron then creating new one
         if (leftCtrlKeyPressed == false) {
-            Neuron *neuron = Neuron::create ();
+            Neuron *neuron = nullptr;
+            if (p_key_pressed) {
+                neuron = Neuron::createPositive ();
+            } else if (n_key_pressed) {
+                neuron = Neuron::createNegative ();
+            } else {
+                neuron = Neuron::create ();
+            }
             neuron->setPosition (touch->getLocation ());
             vNeurons.push_back (neuron);
             addChild (neuron, 1);
@@ -128,25 +153,27 @@ bool Space::init () {
         }
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority (touchEventListener, this);
+}
+
+void Space::KeyboardProcessing () {
 
     // android back press event
     auto keyboardListener = EventListenerKeyboard::create ();
     keyboardListener->onKeyPressed = [=] (cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event) {
         if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_CTRL) { leftCtrlKeyPressed = true; }
         if (keyCode == EventKeyboard::KeyCode::KEY_SPACE) { spaceKeyPressed = true; }
+        if (keyCode == EventKeyboard::KeyCode::KEY_P) { p_key_pressed = true; }
+        if (keyCode == EventKeyboard::KeyCode::KEY_N) { n_key_pressed = true; }
+        if (keyCode == EventKeyboard::KeyCode::KEY_R) { random_exciting = !random_exciting; }
     };
     keyboardListener->onKeyReleased = [=] (cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event) {
         if (keyCode == EventKeyboard::KeyCode::KEY_BACK) { Director::getInstance ()->end (); } // exiting application
         if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_CTRL) { leftCtrlKeyPressed = false; }
         if (keyCode == EventKeyboard::KeyCode::KEY_SPACE) { spaceKeyPressed = false; }
+        if (keyCode == EventKeyboard::KeyCode::KEY_P) { p_key_pressed = false; }
+        if (keyCode == EventKeyboard::KeyCode::KEY_N) { n_key_pressed = false; }
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority (keyboardListener, this);
-
-    buildMatrix (5);
-    //createLayers (7);
-
-    scheduleUpdate ();
-    return true;
 }
 
 void Space::update (float dt) {
@@ -161,6 +188,14 @@ void Space::update (float dt) {
     for (Neuron *hexagon : vHexagons) { hexagon->update (dt); }
     for (Neuron *neuron : vNeurons) { neuron->update (dt); }
     for (Link *link : vLinks) { link->update (dt); }
+
+    if (random_exciting) {
+        for (Neuron *neuron : vNeurons) {
+            if (random (0, 1000) == 500) {
+                neuron->excite (1.f);
+            }
+        }
+    }
 }
 
 void Space::buildMatrix (int size) {

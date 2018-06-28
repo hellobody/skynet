@@ -7,9 +7,13 @@ class Link;
 
 class Neuron : public cocos2d::Sprite {
 
+    enum ENeuronType {eNeutral, ePostitive, eNegative};
+
     float excitement = 0.f;
 
     std::vector <Link *> vLinks;
+
+    ENeuronType type = eNeutral;
 
 public:
 
@@ -17,6 +21,8 @@ public:
     virtual ~Neuron ();
 
     static Neuron *create ();
+    static Neuron *createPositive ();
+    static Neuron *createNegative ();
     static Neuron *createHexagon ();
 
     virtual void update (float);
@@ -25,7 +31,7 @@ public:
 
     void reshapeLinks ();
 
-    void excite (float);
+    void excite (float v, Link *exciting_link = nullptr);
 };
 
 #endif

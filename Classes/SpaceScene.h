@@ -16,10 +16,20 @@ class Space : public cocos2d::Scene {
 
     bool leftCtrlKeyPressed = false;
     bool spaceKeyPressed = false;
+    bool p_key_pressed = false;
+    bool n_key_pressed = false;
+    bool random_exciting = false;
 
     const float halfPi = 1.5707f; // it's almost Pi / 2 to start taken values from 0 from cos func
 
     float timeCounterForScale;
+
+    cocos2d::Size visibleSize;
+    cocos2d::Vec2 origin;
+
+    void AddButtons ();
+    void TouchEventsProcessing ();
+    void KeyboardProcessing ();
 
 public:
     static cocos2d::Scene *createScene ();

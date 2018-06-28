@@ -7,7 +7,7 @@ class Neuron;
 
 class Link : public cocos2d::Sprite {
 
-    float bandwidth = .5f;
+    float bandwidth = .49f;
     float length = 0;
 
     Neuron *neuronA = nullptr;
@@ -26,6 +26,10 @@ public:
     void connectB (Neuron *);
 
     void reshape ();
+
+    void sendSignal (Neuron *sender, float signal_value);
+    void inhibit ();
+    void promote ();
 };
 
 #endif
